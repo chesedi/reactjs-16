@@ -1,68 +1,95 @@
-import React, { useState} from 'react'
+import React, { useState, useEffect } from "react";
+import Image from "./image";
+import useFetchImage from "../utils/hooks/useFetchImage";
+import Loading from "./Loading";
+import InfiniteScroll from "react-infinite-scroll-component";
+import useDebounce from "../utils/hooks/useDebounce";
+import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
 
+export default function Images() {
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [images, setImages, errors, isLoading] = useFetchImage(
+    page,
+    searchTerm
+  );
 
-export default function Images () {
-
-  const [images, setimages] = useState( [
-    "https://images.unsplash.com/photo-1528042182284-cbe0d3da6a42?ixid=MXwxMjA3fDB8MHxzZWFyY2h8NHx8aGVyb3N8ZW58MHx8MHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1572201115533-ca2301dd6fad?ixid=MXwxMjA3fDB8MHxzZWFyY2h8NXx8aGVyb3N8ZW58MHx8MHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1517414204284-fb7e98b2e255?ixid=MXwxMjA3fDB8MHxzZWFyY2h8MTh8fGhlcm9zfGVufDB8fDB8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1542623024-a797a755b8d0?ixid=MXwxMjA3fDB8MHxzZWFyY2h8Mjd8fGhlcm9zfGVufDB8fDB8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-  ])
-
-  const [newImageUrl, setNewImageUrl] = useState("")
-
-  function ShowImage () {
-    return images.map((image, index) => {
-      return (
-        <div className="w-1/3 my-4 flex justify-center" key={index}>
-          <img src={image} width="150" onClick={() => handleRemove(index)}/>
-        </div >
-      );
-    })
+  function handleRemove(index) {
+    setImages([
+      ...images.slice(0, index),
+      ...images.slice(index + 1, images.length),
+    ]);
   }
 
-  function handleAdd () {
-    if (newImageUrl !== '') {
-      setimages([newImageUrl, ...images]);
-      setNewImageUrl("");
-    }
+  const [showPreview, setShowPreview] = useState(false);
 
-
-  }
-
-  function handleChange (event) {
-    setNewImageUrl(event.target.value);
-  }
-
-  function handleRemove (index) {
-    // setimages(images.filter((image, i) => i !== index))
-    setimages([...images.slice(0,index), ...images.slice(index+1,index.length)])
+  const debounce = useDebounce();
+  function handleInput(e) {
+    const text = e.target.value;
+    debounce(() => setSearchTerm(text));
   }
 
   return (
     <section>
-      <div className="flex flex-wrap justify-center">
-        <ShowImage />
+      <div className="my-5">
+        <input
+          type="text"
+          onChange={handleInput}
+          className="w-full border rounded shadow p-2"
+          placeholder="Search Photos Here"
+        />
       </div>
-      <div className="flex justify-between mt-5">
-        <div className="w-full">
-          <input
-            type="text"
-            className="p-2 border border-gray-800 shadow rounded w-full"
-            value={newImageUrl}
-            onChange={handleChange} />
+      {errors.length > 0 && (
+        <div className="flex h-screen">
+          <p className="m-auto">{errors[0]}</p>
         </div>
-        <div className="">
-          <button
-            disabled={newImageUrl === ''}
-            className={`p-2  text-white ml-2 ${newImageUrl !== '' ? 'bg-green-600' : 'bg-green-300'}`} onClick={handleAdd}>
-              Add
-          </button>
-        </div>
-      </div>
+      )}
+      <AnimateSharedLayout>
+        <InfiniteScroll
+          dataLength={images.length}
+          next={() => setPage(page + 1)}
+          hasMore={true}
+          className="flex flex-wrap"
+        >
+          {images.map((img, index) => (
+            <motion.div
+              className="w-1/6 p-1 border flex justify-center"
+              key={index}
+              layoutId={index}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <Image
+                show={() => setShowPreview(index)}
+                image={img.urls.regular}
+                handleRemove={handleRemove}
+                index={index}
+              />
+            </motion.div>
+          ))}
+        </InfiniteScroll>
+
+        <AnimatePresence>
+          {showPreview && (
+            <motion.section
+              layoutId={showPreview}
+              exit={{ opacity: 0, rotate: 360, transition: { duration: 1 } }}
+              className="fixed w-full h-full flex justify-center items-center top-0 left-0 z-40"
+              onClick={() => setShowPreview(false)}
+            >
+              <div className="bg-white">
+                <img
+                  src={images[showPreview].urls.regular}
+                  className="rounded-lg"
+                  width="300"
+                  height="auto"
+                />
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </AnimateSharedLayout>
+      {isLoading && <Loading />}
     </section>
-  )
+  );
 }
-
-
