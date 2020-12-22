@@ -1,13 +1,12 @@
 import firebase from "firebase";
 
 var firebaseConfig = {
-  apiKey: "AIzaSyCFx6G_j_sJTWJWkOKVNvwd0ZiNtqpkqMY",
-  authDomain: "in-depth-react-1.firebaseapp.com",
-  databaseURL: "https://in-depth-react-1.firebaseio.com",
-  projectId: "in-depth-react-1",
-  storageBucket: "in-depth-react-1.appspot.com",
-  messagingSenderId: "931473537546",
-  appId: "1:931473537546:web:b17ceda1196406af1ffdf3",
+  apiKey: "AIzaSyAFrN4JYwPZuQ-7-Dy9pk9rJwanNZiwiMk",
+  authDomain: "react-16-bdcdc.firebaseapp.com",
+  projectId: "react-16-bdcdc",
+  storageBucket: "react-16-bdcdc.appspot.com",
+  messagingSenderId: "820577738664",
+  appId: "1:820577738664:web:63571ef11093d2a2c4c79d"
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
