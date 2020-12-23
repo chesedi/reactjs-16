@@ -9,7 +9,7 @@ import AuthRoute from "./utils/routes/AuthRoute";
 import GuestRoute from "./utils/routes/GuestRoute";
 import Loading from "./components/Loading";
 import NotFound from "./page/404";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence111, motion } from "framer-motion";
 import AnimatedRoute from "./utils/routes/AnimatedRoute";
 
 function App() {
